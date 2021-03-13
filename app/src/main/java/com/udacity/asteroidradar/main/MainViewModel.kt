@@ -1,26 +1,27 @@
 package com.udacity.asteroidradar.main
 
+import android.app.Application
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.udacity.asteroidradar.Asteroid
 import com.udacity.asteroidradar.BuildConfig
 import com.udacity.asteroidradar.PictureOfDay
 import com.udacity.asteroidradar.api.getNextSevenDaysFormattedDates
 import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
+import com.udacity.asteroidradar.database.getDatabase
 import com.udacity.asteroidradar.network.NASAApi
+import com.udacity.asteroidradar.repository.AsteroidRepository
 import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
 import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.net.UnknownHostException
 
 enum class NasaApiStatus { LOADING, ERROR, DONE }
 
-class MainViewModel : ViewModel() {
+class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _status = MutableLiveData<NasaApiStatus>()
     val status: LiveData<NasaApiStatus>
         get() = _status
@@ -30,39 +31,51 @@ class MainViewModel : ViewModel() {
     val pictureOfDay: LiveData<PictureOfDay>
         get() = _pictureOfDay
 
-    private val _asteroids= MutableLiveData<ArrayList<Asteroid>>()
-    val asteroids: LiveData<ArrayList<Asteroid>>
-        get() = _asteroids
-
     private val _navigateToSelectedAsteroid = MutableLiveData<Asteroid?>()
     val navigateToSelectedAsteroid: LiveData<Asteroid?>
         get() = _navigateToSelectedAsteroid
+
+    private val database = getDatabase(application)
+    private val asteroidRepository = AsteroidRepository(database)
 
     init {
         getPictureOfDay()
         getAsteroids()
     }
 
+    val asteroids = asteroidRepository.asteroids
+
     private fun getPictureOfDay() {
         viewModelScope.launch {
-            _pictureOfDay.value = NASAApi.retrofitPictureService.getPictureOfTheDay(BuildConfig.API_KEY)
+            try {
+                _pictureOfDay.value = NASAApi.retrofitPictureService.getPictureOfTheDay(BuildConfig.API_KEY)
+            } catch (ex: UnknownHostException) {
+                Log.e("AsteroidRepository", "no network error")
+            }
         }
     }
 
     private fun getAsteroids() {
         viewModelScope.launch {
-            _status.value = NasaApiStatus.LOADING
             try {
-                val response = NASAApi.retrofitAsteroidsService.getAsteroids(
-                        getNextSevenDaysFormattedDates()[0],
-                        getNextSevenDaysFormattedDates()[7],
-                        BuildConfig.API_KEY)
-                val jsonObject = JSONObject(response)
-                _asteroids.value = parseAsteroidsJsonResult(jsonObject)
-                _status.value = NasaApiStatus.DONE
-            } catch (e: Exception) {
-                _status.value = NasaApiStatus.ERROR
+                asteroidRepository.refreshVideos()
+            } catch (ex: UnknownHostException) {
+                Log.e("AsteroidRepository", "no network error")
+
             }
+
+//            _status.value = NasaApiStatus.LOADING
+//            try {
+//                val response = NASAApi.retrofitAsteroidsService.getAsteroids(
+//                        getNextSevenDaysFormattedDates()[0],
+//                        getNextSevenDaysFormattedDates()[7],
+//                        BuildConfig.API_KEY)
+//                val jsonObject = JSONObject(response)
+//                _asteroids.value = parseAsteroidsJsonResult(jsonObject)
+//                _status.value = NasaApiStatus.DONE
+//            } catch (e: Exception) {
+//                _status.value = NasaApiStatus.ERROR
+//            }
         }
     }
 
@@ -73,4 +86,14 @@ class MainViewModel : ViewModel() {
     fun displayAsteroidDetailsComplete() {
         _navigateToSelectedAsteroid.value = null
     }
+    class Factory(val app: Application) : ViewModelProvider.Factory {
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
+                @Suppress("UNCHECKED_CAST")
+                return MainViewModel(app) as T
+            }
+            throw IllegalArgumentException("Unable to construct viewmodel")
+        }
+    }
+
 }

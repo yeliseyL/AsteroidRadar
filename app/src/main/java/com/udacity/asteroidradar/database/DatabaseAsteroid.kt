@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.udacity.asteroidradar.Asteroid
 
-@Entity
+@Entity(tableName = "asteroid_table")
 data class DatabaseAsteroid constructor(
         @PrimaryKey
         val id: Long,
@@ -16,7 +16,7 @@ data class DatabaseAsteroid constructor(
         val distanceFromEarth: Double,
         val isPotentiallyHazardous: Boolean)
 
-fun ArrayList<DatabaseAsteroid>.asDomainModel(): ArrayList<Asteroid> {
+fun List<DatabaseAsteroid>.asDomainModel(): ArrayList<Asteroid> {
     return map {
         Asteroid(
                 id = it.id,

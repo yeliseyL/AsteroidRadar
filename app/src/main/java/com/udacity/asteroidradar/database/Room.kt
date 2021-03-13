@@ -6,11 +6,11 @@ import androidx.room.*
 
 @Dao
 interface AsteroidDao {
-    @Query("select * from databaseasteroid")
-    fun getAsteroids(): LiveData<ArrayList<DatabaseAsteroid>>
+    @Query("select * from asteroid_table")
+    fun getAsteroids(): LiveData<List<DatabaseAsteroid>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAll(vararg videos: DatabaseAsteroid)
+    fun insertAll(asteroids: List<DatabaseAsteroid>)
 }
 
 @Database(entities = [DatabaseAsteroid::class], version = 1)
