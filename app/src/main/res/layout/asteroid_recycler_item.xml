@@ -20,6 +20,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@{asteroid.codename}"
+            android:contentDescription="@{String.valueOf(asteroid.id)}"
             android:textColor="@color/default_text_color"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -30,6 +31,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="@{asteroid.closeApproachDate}"
+            android:contentDescription="@{asteroid.closeApproachDate}"
             android:textColor="@color/default_text_color"
             app:layout_constraintStart_toStartOf="@+id/asteroidName"
             app:layout_constraintTop_toBottomOf="@+id/asteroidName" />
@@ -40,6 +42,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="340dp"
+            android:contentDescription="@{asteroid.potentiallyHazardous ? @string/potentially_hazardous_asteroid_image : @string/not_hazardous_asteroid_image}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@+id/asteroidName"
             app:layout_constraintTop_toTopOf="parent"
