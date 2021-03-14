@@ -19,6 +19,8 @@ class MainFragment : Fragment() {
         ViewModelProvider(this, MainViewModel.Factory(activity.application)).get(MainViewModel::class.java)
     }
 
+    lateinit var adapter: AsteroidsAdapter
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -28,7 +30,7 @@ class MainFragment : Fragment() {
 
         binding.viewModel = viewModel
 
-        val adapter = AsteroidsAdapter(AsteroidsAdapter.OnClickListener {
+        adapter = AsteroidsAdapter(AsteroidsAdapter.OnClickListener {
             viewModel.displayAsteroidDetails(it)
         })
 
@@ -60,6 +62,23 @@ class MainFragment : Fragment() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return true
+        return when (item.itemId) {
+            R.id.show_all_menu -> {
+                viewModel.getAsteroids()
+                adapter.notifyDataSetChanged()
+                true
+            }
+            R.id.show_today_menu -> {
+                viewModel.getTodayAsteroids()
+                adapter.notifyDataSetChanged()
+                true
+            }
+            R.id.show_saved_menu -> {
+                viewModel.getAllAsteroids()
+                adapter.notifyDataSetChanged()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 }

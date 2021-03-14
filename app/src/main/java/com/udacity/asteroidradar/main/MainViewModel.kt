@@ -26,7 +26,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val status: LiveData<NasaApiStatus>
         get() = _status
 
-
     private val _pictureOfDay = MutableLiveData<PictureOfDay>()
     val pictureOfDay: LiveData<PictureOfDay>
         get() = _pictureOfDay
@@ -55,29 +54,43 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private fun getAsteroids() {
+    fun getAsteroids() {
         viewModelScope.launch {
             try {
+                _status.value = NasaApiStatus.LOADING
                 asteroidRepository.refreshVideos()
+                _status.value = NasaApiStatus.DONE
             } catch (ex: UnknownHostException) {
                 Log.e("AsteroidRepository", "no network error")
-
+                _status.value = NasaApiStatus.ERROR
             }
-
-//            _status.value = NasaApiStatus.LOADING
-//            try {
-//                val response = NASAApi.retrofitAsteroidsService.getAsteroids(
-//                        getNextSevenDaysFormattedDates()[0],
-//                        getNextSevenDaysFormattedDates()[7],
-//                        BuildConfig.API_KEY)
-//                val jsonObject = JSONObject(response)
-//                _asteroids.value = parseAsteroidsJsonResult(jsonObject)
-//                _status.value = NasaApiStatus.DONE
-//            } catch (e: Exception) {
-//                _status.value = NasaApiStatus.ERROR
-//            }
         }
     }
+
+    fun getTodayAsteroids() {
+        viewModelScope.launch {
+            try {
+                _status.value = NasaApiStatus.LOADING
+                asteroidRepository.getTodayAsteroids()
+                _status.value = NasaApiStatus.DONE
+            } catch (ex: UnknownHostException) {
+                _status.value = NasaApiStatus.ERROR
+            }
+        }
+    }
+
+    fun getAllAsteroids() {
+        viewModelScope.launch {
+            try {
+                _status.value = NasaApiStatus.LOADING
+                asteroidRepository.getAllAsteroids()
+                _status.value = NasaApiStatus.DONE
+            } catch (ex: UnknownHostException) {
+                _status.value = NasaApiStatus.ERROR
+            }
+        }
+    }
+
 
     fun displayAsteroidDetails(asteroid: Asteroid) {
         _navigateToSelectedAsteroid.value = asteroid
