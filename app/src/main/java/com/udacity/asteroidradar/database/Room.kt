@@ -7,13 +7,13 @@ import androidx.room.*
 @Dao
 interface AsteroidDao {
     @Query("select * from databaseasteroid")
-    fun getAsteroids(): LiveData<ArrayList<DatabaseAsteroid>>
+    fun getAsteroids(): LiveData<List<DatabaseAsteroid>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(vararg videos: DatabaseAsteroid)
 }
 
-@Database(entities = [DatabaseAsteroid::class], version = 1)
+@Database(entities = [DatabaseAsteroid::class], version = 1, exportSchema = false)
 abstract class AsteroidDatabase : RoomDatabase() {
     abstract val asteroidDao: AsteroidDao
 }
