@@ -24,7 +24,7 @@ class MainFragment : Fragment() {
         binding.viewModel = viewModel
 
         val adapter = AsteroidsAdapter(AsteroidsAdapter.OnClickListener {
-            viewModel.displayAsteroidDetails(it)
+//            viewModel.displayAsteroidDetails(it)
         })
 
         binding.asteroidRecycler.adapter = adapter
